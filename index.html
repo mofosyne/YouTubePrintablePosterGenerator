@@ -1,0 +1,143 @@
+<!-- Brian Khuu 2024 -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video Printable Poster Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f9f9f9;
+            margin: 0;
+        }
+        #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #controls {
+            margin-bottom: 20px;
+        }
+        #controls #print {
+            display: none;
+        }
+        #poster {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid #000;
+            border-radius: 15px;
+            padding: 20px;
+            background-color: #fff;
+            width: 140mm;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #poster img {
+            max-width: 100%;
+        }
+        #poster img .thumbnail {
+            width: 100%;
+        }
+        #poster img .qrcode {
+            max-width: 100%;
+            image-rendering: pixelated;
+        }
+        #poster h2 {
+            text-align: center;
+            margin: 10px 0;
+        }
+        #author {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #qrlink {
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #poster, #poster * {
+                visibility: visible;
+            }
+            #poster {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                margin: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="container">
+        <h1>YouTube Video Printable Poster Generator</h1>
+
+        <div id="controls">
+            <input type="text" id="youtubeUrl" placeholder="Enter YouTube URL">
+            <button onclick="generatePoster()">Generate Poster</button>
+            <div id="print">
+                <button onclick="window.print()">Print Poster</button>
+            </div>
+        </div>
+
+        <div id="poster">
+            <img id="thumbnail" src="" alt="Thumbnail">
+            <h2 id="title"></h2>
+            <div id="author"></div>
+            <div id="qrcode"></div>
+            <div id="qrlink"></div>
+        </div>
+    </div>
+
+    <script src="https://davidshimjs.github.io/qrcodejs/qrcode.min.js"></script>
+    <script>
+        async function fetchVideoDetails(url) {
+            const apiUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
+            const response = await fetch(apiUrl);
+            if (!response.ok) {
+                throw new Error('Failed to fetch video details');
+            }
+            return response.json();
+        }
+
+        function generateQRCode(url, pixel_size) {
+            const qrCodeContainer = document.getElementById('qrcode');
+            qrCodeContainer.innerHTML = '';
+            new QRCode(qrCodeContainer, {
+                text: url,
+                width: pixel_size,
+                height: pixel_size,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        async function generatePoster() {
+            const youtubeUrl = document.getElementById('youtubeUrl').value;
+            try {
+                const videoDetails = await fetchVideoDetails(youtubeUrl);
+                document.getElementById('thumbnail').src = videoDetails.thumbnail_url;
+                document.getElementById('title').textContent = videoDetails.title;
+                document.getElementById('author').innerHTML = `by <a href="${videoDetails.author_url}" target="_blank">${videoDetails.author_name}</a>`;
+                generateQRCode(youtubeUrl, videoDetails.thumbnail_height/2);
+                document.getElementById('qrlink').textContent = youtubeUrl;
+                document.getElementById('poster').style.display = 'flex';
+                document.getElementById('print').style.display = 'inline';
+            } catch (error) {
+                alert('Error generating poster: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
