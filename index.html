@@ -60,6 +60,18 @@
             margin-top: 10px;
             margin-bottom: 10px;
         }
+        #github-link {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #007bff;
+        }
+        #github-link a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        #github-link a:hover {
+            text-decoration: underline;
+        }
         @media print {
             body * {
                 visibility: hidden;
@@ -87,6 +99,9 @@
             <button onclick="generatePoster()">Generate Poster</button>
             <div id="print">
                 <button onclick="window.print()">Print Poster</button>
+            </div>
+            <div id="github-link">
+                <p>Want to improve this? Visit the <a href="https://github.com/mofosyne/YoutTubePrintablePosterGenerator/" target="_blank">GitHub Repository</a>.</p>
             </div>
         </div>
 
