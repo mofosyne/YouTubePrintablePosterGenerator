@@ -23,9 +23,6 @@
         #controls {
             margin-bottom: 20px;
         }
-        #controls #print {
-            display: none;
-        }
         #poster {
             display: none;
             flex-direction: column;
@@ -97,14 +94,9 @@
         <div id="controls">
             <input type="text" id="youtubeUrl" placeholder="Enter YouTube URL">
             <button onclick="generatePoster()">Generate Poster</button>
-            <div id="print">
-                <button onclick="window.print()">Print Poster</button>
-            </div>
-            <div id="github-link">
-                <p><a href="https://github.com/mofosyne/YouTubePrintablePosterGenerator/" target="_blank">Want to help improve this page? Click to visit this GitHub repository!</a>.</p>
-            </div>
+            <button id="print-button" onclick="window.print()" disabled>Print Poster</button>
         </div>
-
+        
         <div id="poster">
             <img id="thumbnail" src="" alt="Thumbnail">
             <h2 id="title"></h2>
@@ -112,11 +104,18 @@
             <div id="qrcode"></div>
             <div id="qrlink"></div>
         </div>
+
+        <div id="github-link">
+            <p><a href="https://github.com/mofosyne/YouTubePrintablePosterGenerator/" target="_blank">Want to help improve this page? Click to visit this GitHub repository!</a>.</p>
+        </div>
     </div>
 
     <script src="https://davidshimjs.github.io/qrcodejs/qrcode.min.js"></script>
     <script>
         async function fetchVideoDetails(url) {
+            if (url == "") {
+                throw new Error('Url missing');
+            }
             const apiUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`;
             const response = await fetch(apiUrl);
             if (!response.ok) {
@@ -134,7 +133,7 @@
                 height: pixel_size,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
+                correctLevel: QRCode.CorrectLevel.M
             });
         }
 
@@ -148,7 +147,7 @@
                 generateQRCode(youtubeUrl, videoDetails.thumbnail_height/2);
                 document.getElementById('qrlink').textContent = youtubeUrl;
                 document.getElementById('poster').style.display = 'flex';
-                document.getElementById('print').style.display = 'inline';
+                document.getElementById('print-button').disabled = false;
             } catch (error) {
                 alert('Error generating poster: ' + error.message);
             }
