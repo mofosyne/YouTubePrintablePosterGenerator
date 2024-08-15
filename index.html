@@ -44,6 +44,14 @@
             max-width: 100%;
             image-rendering: pixelated;
         }
+        #poster a{
+            color:rgb(0, 0, 0);
+            text-decoration:none;
+        }
+        #poster a:visited{
+            color:rgb(0, 0, 0);
+            text-decoration:none;
+        }
         #poster h2 {
             text-align: center;
             margin: 10px 0;
@@ -152,7 +160,7 @@
                 document.getElementById('title').textContent = videoDetails.title;
                 document.getElementById('author').innerHTML = `by <a href="${videoDetails.author_url}" target="_blank">${videoDetails.author_name}</a>`;
                 generateQRCode(youtubeUrl, videoDetails.thumbnail_height/2);
-                document.getElementById('qrlink').textContent = youtubeUrl;
+                document.getElementById('qrlink').innerHTML = `<a href="${youtubeUrl}" target="_blank">${youtubeUrl}</a>`;
                 document.getElementById('poster').style.display = 'flex';
                 document.getElementById('print-button').disabled = false;
 
