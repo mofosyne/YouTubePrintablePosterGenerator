@@ -106,8 +106,9 @@
 
         <div id="controls">
             <input type="text" id="youtubeUrl" placeholder="Enter YouTube URL">
-            <button onclick="generatePosterManually()">Generate Poster</button>
-            <button id="print-button" onclick="window.print()" disabled>Print Poster</button>
+            <button onclick="generatePosterManually()">Generate</button>
+            <button onclick="clearingPosterManually()">Clear</button>
+            <button id="print-button" onclick="window.print()" disabled>Print</button>
         </div>
 
         <div id="poster">
@@ -166,6 +167,13 @@
             const youtubeUrl = document.getElementById('youtubeUrl').value;
             const descriptionInput = document.getElementById('descriptionInput').value;
             generatePoster(youtubeUrl, descriptionInput)
+        }
+
+        async function clearingPosterManually() {
+            document.getElementById('youtubeUrl').value = "";
+            document.getElementById('descriptionInput').value = "";
+            document.getElementById('poster').style.display = 'none';
+            window.history.replaceState({}, document.title, ``);
         }
 
         async function descriptionUpdated() {
