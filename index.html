@@ -11,11 +11,15 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
             background-color: #f9f9f9;
             margin: 0;
         }
         #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #control_panel {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -30,6 +34,7 @@
             border: 2px solid #000;
             border-radius: 15px;
             padding: 20px;
+            margin: 20px;
             background-color: #fff;
             width: 140mm;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -104,13 +109,6 @@
     <div id="container">
         <h1>YouTube Video Printable Poster Generator</h1>
 
-        <div id="controls">
-            <input type="text" id="youtubeUrl" placeholder="Enter YouTube URL">
-            <button onclick="generatePosterManually()">Generate</button>
-            <button onclick="clearingPosterManually()">Clear</button>
-            <button id="print-button" onclick="window.print()" disabled>Print</button>
-        </div>
-
         <div id="poster">
             <img id="thumbnail" src="" alt="Thumbnail">
             <h2 id="title"></h2>
@@ -120,13 +118,24 @@
             <div id="qrlink"></div>
         </div>
 
-        <div id="github-link">
-            <p><a href="https://github.com/mofosyne/YouTubePrintablePosterGenerator/" target="_blank">Want to help improve this page? Click to visit this GitHub repository!</a>.</p>
+        <div id="control_panel">
+            <div id="controls">
+                <input type="text" id="youtubeUrl" placeholder="Enter YouTube URL">
+                <button onclick="generatePosterManually()">Generate</button>
+                <button onclick="clearingPosterManually()">Clear</button>
+                <button id="print-button" onclick="window.print()" disabled>Print</button>
+            </div>
+            <div>
+            </div>
+            <div id="extracontent"></div>
+                <textarea type="text" id="descriptionInput" placeholder="Enter Optional Description" oninput="descriptionUpdated()"></textarea>
+            </div>
+            <div id="github-link">
+                <p><a href="https://github.com/mofosyne/YouTubePrintablePosterGenerator/" target="_blank">Want to help improve this page? Click to visit this GitHub repository!</a>.</p>
+            </div>
         </div>
 
-        <div id="extracontent"></div>
-            <textarea type="text" id="descriptionInput" placeholder="Enter Optional Description" oninput="descriptionUpdated()"></textarea>
-        </div>
+
     </div>
 
     <!-- <script src="https://davidshimjs.github.io/qrcodejs/qrcode.min.js"></script> -->
@@ -1692,10 +1701,6 @@
              */
             QRCode.CorrectLevel = QRErrorCorrectLevel;
         })();
-
-
-
-
 
     </script>
 </body>
