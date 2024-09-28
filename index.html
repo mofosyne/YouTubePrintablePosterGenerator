@@ -159,15 +159,6 @@
 
     <!-- <script src="https://davidshimjs.github.io/qrcodejs/qrcode.min.js"></script> -->
     <script>
-      function getUrlParameter(name) {
-        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-        const regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
-        const results = regex.exec(location.search);
-        return results === null
-          ? ""
-          : decodeURIComponent(results[1].replace(/\+/g, " "));
-      }
-
       async function fetchVideoDetails(url) {
         if (url == "") {
           throw new Error("Url missing");
@@ -218,18 +209,45 @@
         window.history.replaceState({}, document.title, `?`);
       }
 
+      async function updateDescription(description) {
+        if (description && description.length > 0) {
+          document.getElementById("description").innerHTML = description;
+          document.getElementById("description").style.display = "flex";
+        } else {
+          document.getElementById("description").innerHTML = "";
+          document.getElementById("description").style.display = "none";
+        }
+      }
+
+      async function updateURI(youtubeUrl, description) {
+        // Update the URL in the address bar with the video ID
+        const videoId = new URL(youtubeUrl).searchParams.get("v");
+
+        if (!videoId) {
+          return;
+        }
+
+        let uri_args = [];
+        uri_args.push(`v=${videoId}`);
+        if (description && description.length > 0) {
+          uri_args.push(`d=${encodeURI(description)}`);
+        }
+        window.history.replaceState(
+          {},
+          document.title,
+          "?" + uri_args.join("&")
+        );
+      }
+
       async function descriptionUpdated() {
         // No need to regenerate QR Code
         const videoId = new URLSearchParams(window.location.search).get("v");
         const descInput = document.getElementById("descInput").value;
-        document.getElementById("description").innerHTML = descInput;
-        document.getElementById("description").style.display =
-          descInput.length > 0 ? "flex" : "none";
-        window.history.replaceState(
-          {},
-          document.title,
-          `?v=${videoId}&d=${encodeURI(descInput)}`
-        );
+        updateDescription(descInput);
+        if (videoId) {
+          const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
+          updateURI(youtubeUrl, descInput);
+        }
       }
 
       async function generatePoster(youtubeUrl, description) {
@@ -246,25 +264,8 @@
           document.getElementById("poster").style.display = "flex";
           document.getElementById("print-button").disabled = false;
 
-          if (description && description.length > 0) {
-            document.getElementById("description").innerHTML = description;
-            document.getElementById("description").style.display = "flex";
-          } else {
-            document.getElementById("description").innerHTML = "";
-            document.getElementById("description").style.display = "none";
-          }
-
-          // Update the URL in the address bar with the video ID
-          const videoId = new URL(youtubeUrl).searchParams.get("v");
-          let uri_args = [];
-          if (videoId) {
-            uri_args.push(`v=${videoId}`);
-            if (description && description.length > 0) {
-                uri_args.push(`d=${encodeURI(description)}`);
-            }
-        }
-        window.history.replaceState({}, document.title, "?" + uri_args.join("&"));
-
+          updateDescription(description);
+          updateURI(youtubeUrl, description);
           generateQRCode(youtubeUrl, videoDetails.thumbnail_height / 2);
         } catch (error) {
           alert("Error generating poster: " + error.message);
@@ -279,10 +280,8 @@
           document.getElementById("youtubeUrl").value = youtubeUrl;
           if (descInput) {
             document.getElementById("descInput").value = descInput;
-            generatePoster(youtubeUrl, descInput);
-          } else {
-            generatePoster(youtubeUrl, null);
           }
+          generatePoster(youtubeUrl, descInput);
         }
       };
 
