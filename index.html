@@ -87,6 +87,14 @@
       #github-link a:hover {
         text-decoration: underline;
       }
+      #debug_window pre {
+        white-space: pre-wrap;       /* css-3 */
+        white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+        white-space: -pre-wrap;      /* Opera 4-6 */
+        white-space: -o-pre-wrap;    /* Opera 7 */
+        word-wrap: break-word;       /* Internet Explorer 5.5+ */
+        max-width: 200mm;
+      }
       @media print {
         body * {
           visibility: hidden;
@@ -155,6 +163,7 @@
           </p>
         </div>
       </div>
+      <div id="debug_window"><details id="debug_details"></details></div>
     </div>
 
     <!-- <script src="https://davidshimjs.github.io/qrcodejs/qrcode.min.js"></script> -->
@@ -263,6 +272,10 @@
           ).innerHTML = `<a href="${youtubeUrl}" target="_blank">${youtubeUrl}</a>`;
           document.getElementById("poster").style.display = "flex";
           document.getElementById("print-button").disabled = false;
+
+          debug_element = document.getElementById("debug_details");
+          debug_element.innerHTML = "<summary>oEmbed json</summary>";
+          debug_element.appendChild(document.createElement("pre")).appendChild(document.createTextNode(JSON.stringify(videoDetails, null, 2)));
 
           updateDescription(description);
           updateURI(youtubeUrl, description);
