@@ -75,6 +75,12 @@
         margin-top: 10px;
         margin-bottom: 10px;
       }
+      #generatedTime {
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-size: 10px;
+      }
       #github-link {
         margin-top: 20px;
         font-size: 14px;
@@ -124,6 +130,7 @@
         <div id="description">Description</div>
         <div id="qrcode"></div>
         <div id="qrlink"></div>
+        <div id="generatedTime"></div>
       </div>
 
       <div id="control_panel">
@@ -276,6 +283,10 @@
           debug_element = document.getElementById("debug_details");
           debug_element.innerHTML = "<summary>oEmbed json</summary>";
           debug_element.appendChild(document.createElement("pre")).appendChild(document.createTextNode(JSON.stringify(videoDetails, null, 2)));
+
+          const now = new Date();
+          const monthYear = now.toLocaleString("default", { month: "long", year: "numeric" });
+          document.getElementById("generatedTime").textContent = `Generated on ${monthYear}`;
 
           updateDescription(description);
           updateURI(youtubeUrl, description);
