@@ -42,11 +42,16 @@
       #poster img {
         max-width: 100%;
       }
-      #poster img .thumbnail {
+      #poster #banner {
         width: 100%;
+        border-radius: 10px; /* Rounded corners */
       }
-      #poster img .qrcode {
-        max-width: 100%;
+      #poster #thumbnail {
+        width: 80%;
+        border-radius: 10px; /* Rounded corners */
+      }
+      #poster #qrcode {
+        max-width: 40%;
         image-rendering: pixelated;
         margin: 10px;
       }
@@ -70,10 +75,20 @@
         text-align: center;
         margin-bottom: 20px;
       }
+      #aboutUs {
+        text-align: center;
+        margin-bottom: 20px;
+      }
       #qrlink {
         text-align: center;
         margin-top: 10px;
         margin-bottom: 10px;
+      }
+      #generatedTime {
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-size: 10px;
       }
       #github-link {
         margin-top: 20px;
@@ -86,6 +101,9 @@
       }
       #github-link a:hover {
         text-decoration: underline;
+      }
+      #compatibility-notice {
+        font-size: 14px;
       }
       #debug_window pre {
         white-space: pre-wrap;       /* css-3 */
@@ -161,6 +179,9 @@
               repository!</a
             >.
           </p>
+        </div>
+        <div id="compatibility-notice">
+          <p>Works Best On Chrome</p>
         </div>
       </div>
       <div id="debug_window"><details id="debug_details"></details></div>
@@ -268,7 +289,7 @@
           document.getElementById("title").textContent = videoDetails.title;
           document.getElementById(
             "author"
-          ).innerHTML = `by <a href="${videoDetails.author_url}" target="_blank">${videoDetails.author_name}</a>`;
+          ).innerHTML = `By <a href="${videoDetails.author_url}" target="_blank">${videoDetails.author_name}</a>`;
           document.getElementById(
             "qrlink"
           ).innerHTML = `<a href="${youtubeUrl}" target="_blank">${youtubeUrl}</a>`;
