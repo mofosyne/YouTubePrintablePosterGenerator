@@ -42,13 +42,16 @@
       #poster img {
         max-width: 100%;
       }
-      #poster img .banner {
+      #poster #banner {
         width: 100%;
+        border-radius: 10px; /* Rounded corners */
+        margin-bottom: 10px;
       }
-      #poster img .thumbnail {
-        width: 100%;
+      #poster #thumbnail {
+        width: 80%;
+        border-radius: 10px; /* Rounded corners */
       }
-      #poster img .qrcode {
+      #poster #qrcode {
         max-width: 100%;
         image-rendering: pixelated;
         margin: 10px;
@@ -73,7 +76,7 @@
         text-align: center;
         margin-bottom: 20px;
       }
-      #aboutPodcast {
+      #aboutUs {
         text-align: center;
         margin-bottom: 20px;
       }
@@ -99,6 +102,9 @@
       }
       #github-link a:hover {
         text-decoration: underline;
+      }
+      #compatibility-notice {
+        font-size: 14px;
       }
       #debug_window pre {
         white-space: pre-wrap;       /* css-3 */
@@ -177,6 +183,9 @@
               repository!</a
             >.
           </p>
+        </div>
+        <div id="compatibility-notice">
+          <p>Works Best On Chrome</p>
         </div>
       </div>
       <div id="debug_window"><details id="debug_details"></details></div>

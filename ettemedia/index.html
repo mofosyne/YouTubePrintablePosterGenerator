@@ -137,12 +137,15 @@
       <h1>YouTube Video Printable Poster Generator</h1>
 
       <div id="poster">
+        <img id="banner" src="banner.jpg" alt="Banner" />
         <img id="thumbnail" src="http://example.com" alt="Thumbnail" />
         <h2 id="title">Title</h2>
         <div id="author">Author</div>
         <div id="description">Description</div>
+        <div id="aboutPodcast">Add our podcast to your feed! Search for 'We Used To Be Journos' on Apple, Spotify or any podcast platform of your choosing!</div>
         <div id="qrcode"></div>
         <div id="qrlink"></div>
+        <div id="generatedTime"></div>
       </div>
 
       <div id="control_panel">
@@ -258,12 +261,10 @@
           return;
         }
 
-        compressed_description = await compressTextToBase64(description);
-
         let uri_args = [];
         uri_args.push(`v=${videoId}`);
         if (description && description.length > 0) {
-          uri_args.push(`d=${encodeURIComponent(compressed_description)}`);
+          uri_args.push(`d=${encodeURI(description)}`);
         }
         window.history.replaceState(
           {},
@@ -301,6 +302,10 @@
           debug_element.innerHTML = "<summary>oEmbed json</summary>";
           debug_element.appendChild(document.createElement("pre")).appendChild(document.createTextNode(JSON.stringify(videoDetails, null, 2)));
 
+          const now = new Date();
+          const monthYear = now.toLocaleString("default", { month: "long", year: "numeric" });
+          document.getElementById("generatedTime").textContent = `Generated on ${monthYear}`;
+
           updateDescription(description);
           updateURI(youtubeUrl, description);
           generateQRCode(youtubeUrl, videoDetails.thumbnail_height / 2);
@@ -309,102 +314,20 @@
         }
       }
 
-      window.onload = async function () {
+      window.onload = function () {
         const videoId = new URLSearchParams(window.location.search).get("v");
         const descInput = new URLSearchParams(window.location.search).get("d");
         if (videoId) {
           const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
           document.getElementById("youtubeUrl").value = youtubeUrl;
-          description = null
           if (descInput) {
-            description = await decompressBase64ToText(descInput)
-            document.getElementById("descInput").value = description;
+            document.getElementById("descInput").value = descInput;
           }
-          generatePoster(youtubeUrl, description);
+          generatePoster(youtubeUrl, descInput);
         }
       };
 
-      /******************************************************************************
-       * Text To Base64 And Vis Versa
-       ******************************************************************************/
-
-      /**
-       * Compress To Base64 From Text
-       */
-      async function compressTextToBase64(uncompressedText) {
-        const compressedBlob = await compressBlob(uncompressedText);
-        const compressedBase64 = await blobToBase64(compressedBlob);
-        return compressedBase64;
-      }
-
-      /**
-       * Decompress From Base64 To Text
-       */
-      async function decompressBase64ToText(compressedBase64) {
-        console.log(compressedBase64)
-        const compressedBlob = await base64ToBlob(compressedBase64);
-        const decompressedText = await decompressBlob(compressedBlob);
-        return decompressedText;
-      }
-
-      /**
-       * Converts a Blob object into a Base64-encoded string.
-       * @param {Blob} blob - The blob to be converted.
-       * @returns {Promise<string>} - The Base64-encoded string.
-       */
-      async function blobToBase64(blob) {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = function () {
-            resolve(reader.result.split(",")[1]);
-          };
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-      }
-
-      /**
-       * Converts a Base64-encoded string into a Blob object.
-       * @param {string} base64 - The Base64-encoded string to be converted.
-       * @returns {Promise<Blob>} - The converted blob.
-       */
-      async function base64ToBlob(base64) {
-        const response = await fetch(
-          "data:application/octet-stream;base64," + base64
-        );
-        return response.blob();
-      }
-
-      /**
-       * Compresses the provided text and returns a Blob containing the compressed data.
-       * @param {string} text - The text to be compressed.
-       * @returns {Promise<Blob>} - The compressed blob.
-       */
-      async function compressBlob(text) {
-        const uint8Array = new TextEncoder().encode(text);
-        const blob = new Blob([uint8Array], {
-          type: "application/octet-stream",
-        });
-        const compressedStream = blob
-          .stream()
-          .pipeThrough(new CompressionStream("gzip"));
-        return new Response(compressedStream).blob();
-      }
-
-      /**
-       * Decompresses a Blob object compressed using gzip.
-       * @param {Blob} blob - The compressed blob.
-       * @returns {Promise<string>} - The decompressed content as a string.
-       */
-      async function decompressBlob(blob) {
-        const ds = new DecompressionStream("gzip");
-        const decompressedStream = blob.stream().pipeThrough(ds);
-        return new Response(decompressedStream).text();
-      }
-
-      /******************************************************************************
-       * QRCODE JS
-       ******************************************************************************/
+      /*********************************************************************/
       // https://github.com/davidshimjs/qrcodejs
       /**
        * @fileoverview
