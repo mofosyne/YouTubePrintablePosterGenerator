@@ -141,7 +141,7 @@
         <h2 id="title">Title</h2>
         <div id="author">Author</div>
         <div id="description">Description</div>
-        <div id="aboutPodcast">Add our podcast to your feed! Search for 'We Used To Be Journos' on Apple, Spotify or any podcast platform of your choosing!</div>
+        <div id="aboutUs">Add our podcast to your feed! Search for 'We Used To Be Journos' on Apple, Spotify or any podcast platform of your choosing!</div>
         <div id="qrcode"></div>
         <div id="qrlink"></div>
         <div id="generatedTime"></div>
@@ -303,7 +303,9 @@
 
           const now = new Date();
           const monthYear = now.toLocaleString("default", { month: "long", year: "numeric" });
-          document.getElementById("generatedTime").textContent = `Generated on ${monthYear}`;
+          const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+          const monthLine = months.map((m, i) => i === now.getMonth() ? `<b>[${m}]</b>` : m).join(" ");
+          document.getElementById("generatedTime").innerHTML = `<p>Generated on ${monthYear}</p><p>${monthLine}</p>`;
 
           updateDescription(description);
           updateURI(youtubeUrl, description);

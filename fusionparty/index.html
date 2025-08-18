@@ -303,7 +303,9 @@
 
           const now = new Date();
           const monthYear = now.toLocaleString("default", { month: "long", year: "numeric" });
-          document.getElementById("generatedTime").textContent = `Generated on ${monthYear}`;
+          const months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+          const monthLine = months.map((m, i) => i === now.getMonth() ? `<b>[${m}]</b>` : m).join(" ");
+          document.getElementById("generatedTime").innerHTML = `<p>Generated on ${monthYear}</p><p>${monthLine}</p>`;
 
           updateDescription(description);
           updateURI(youtubeUrl, description);
