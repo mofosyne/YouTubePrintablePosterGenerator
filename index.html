@@ -43,6 +43,7 @@
         max-width: 100%;
       }
       #poster #banner {
+        display: none;
         width: 100%;
         border-radius: 10px; /* Rounded corners */
       }
@@ -76,6 +77,7 @@
         margin-bottom: 20px;
       }
       #aboutUs {
+        display: none;
         text-align: center;
         margin-bottom: 20px;
       }
@@ -136,10 +138,12 @@
       <h1>YouTube Video Printable Poster Generator</h1>
 
       <div id="poster">
+        <img id="banner" src="banner.png" alt="Banner" />
         <img id="thumbnail" src="http://example.com" alt="Thumbnail" />
         <h2 id="title">Title</h2>
         <div id="author">Author</div>
         <div id="description">Description</div>
+        <div id="aboutUs"></div>
         <div id="qrcode"></div>
         <div id="qrlink"></div>
         <div id="generatedTime"></div>
@@ -202,6 +206,41 @@
           throw new Error("Failed to fetch video details");
         }
         return response.json();
+      }
+
+      async function fetchChannelDetails(channelName) {
+        try {
+          const data = {
+            "Mr M History": {
+              "banner": "https://yt3.googleusercontent.com/VKJwEDuGIh4uMdOQwC086QlNblqDIkiVDkHCddcVkWnZndCDZHSz1Sxm0uSlDrN0opH6--h_=w2276-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj",
+              "about": "Get trained in Australian history!"
+            },
+            "My First Party": {
+              "banner": "https://yt3.googleusercontent.com/aeEOtX1wd6Kx5cVJT5vSACMyWLKIhzoe-dGu5eDIR0WLsw8puHv-cPiR55uUbI3Vi41BY46_IA=w2560-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj",
+              "about": "Add our podcast to your feed! Search for 'My First Party' on Apple, Spotify or any podcast platform of your choosing!"
+            },
+            "Ette Media": {
+              "banner": "https://yt3.googleusercontent.com/pVC5IIhpSWDufYPqS9ExE1RR73VT1bN2B4EsAB3jOykYzddzgFNcwP6H8WY_2ZUPYe0LOAhTWQ=w2560-fcrop64=1,00005a57ffffa5a8-k-c0xffffffff-no-nd-rj",
+              "about": "Add our podcast to your feed! Search for 'We Used To Be Journos' on Apple, Spotify or any podcast platform of your choosing!"
+            }
+          }
+
+          // TODO: Decide if we want this approach even if less portable.
+          //const response = await fetch(`/data.json`);
+          //if (!response.ok) {
+          //  return undefined;
+          //}
+          //const data = await response.json();
+
+          
+          if (!data[channelName]) {
+            return undefined;
+          }
+          
+          return {banner: data[channelName].banner, about: data[channelName].about};
+        } catch (err) {
+          return undefined;
+        }
       }
 
       function generateQRCode(url, pixel_size) {
@@ -284,6 +323,29 @@
       async function generatePoster(youtubeUrl, description) {
         try {
           const videoDetails = await fetchVideoDetails(youtubeUrl);
+          const channelDetails = await fetchChannelDetails(videoDetails.author_name);
+          if (channelDetails)
+          {
+            if (channelDetails.banner)
+            {
+              document.getElementById("banner").src = channelDetails.banner;
+              document.getElementById("banner").style.display = "flex";
+            }
+            else
+            {
+              document.getElementById("banner").style.display = "none";
+            }
+            if (channelDetails.about)
+            {
+              document.getElementById("aboutUs").innerHTML = channelDetails.about;
+              document.getElementById("aboutUs").style.display = "flex";
+            }
+            else
+            {
+              document.getElementById("aboutUs").style.display = "none";
+            }
+          }
+
           document.getElementById("thumbnail").src = videoDetails.thumbnail_url;
           document.getElementById("title").textContent = videoDetails.title;
           document.getElementById(
