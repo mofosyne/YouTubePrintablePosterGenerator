@@ -161,7 +161,7 @@
           <button
             type="button"
             id="print-button"
-            onclick="window.print()"
+            onclick="print_poster(); return false;"
             disabled
           >
             Print
@@ -403,12 +403,26 @@
           const monthLine = months.map((m, i) => i === now.getMonth() ? `<b>[${m}]</b>` : m).join(" ");
           document.getElementById("generatedTime").innerHTML = `Generated on ${monthYear}<br>${monthLine}`;
 
+          document.title = videoDetails.title + " - " + videoDetails.author_name;
+
           updateDescription(description);
           updateURI(youtubeUrl, description);
           generateQRCode(youtubeUrl, videoDetails.thumbnail_height / 2);
         } catch (error) {
           alert("Error generating poster: " + error.message);
         }
+      }
+
+      function print_poster() {
+        const originalTitle = document.title;
+        const adjustedTitle = originalTitle
+          .replace(/[\\\/:*?"<>|]/g, '')  // remove illegal filename chars
+          .replace(/\s+/g, ' ')           // collapse multiple spaces
+          .trim();                        // remove leading/trailing spaces
+        const dateString = new Date().toISOString().substring(0, 7);
+        document.title = dateString + "_YouTube_Poster - " + adjustedTitle;
+        window.print();
+        document.title = originalTitle;
       }
 
       window.onload = function () {
