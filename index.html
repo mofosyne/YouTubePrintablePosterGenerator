@@ -345,10 +345,11 @@
 
       async function updateDescription(description) {
         if (description && description.length > 0) {
-          document.getElementById("description").innerHTML = description;
+          document.getElementById("description").textContent = description;
+          document.getElementById("description").style.whiteSpace = "pre-wrap";
           document.getElementById("description").style.display = "flex";
         } else {
-          document.getElementById("description").innerHTML = "";
+          document.getElementById("description").textContent = "";
           document.getElementById("description").style.display = "none";
         }
       }
@@ -1979,7 +1980,7 @@
         function _getUTF8Length(sText) {
           var replacedText = encodeURI(sText)
             .toString()
-            .replace(/\%[0-9a-fA-F]{2}/g, "a");
+            ./\%[0-9a-fA-F]{2}/g, "a");
           return replacedText.length + (replacedText.length != sText ? 3 : 0);
         }
 
