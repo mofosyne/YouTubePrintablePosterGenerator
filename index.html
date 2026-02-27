@@ -353,7 +353,7 @@
 
       async function updateDescription(description) {
         if (description && description.length > 0) {
-          document.getElementById("description").textContent = description;
+          document.getElementById("description").textContent = description.trim();
           document.getElementById("description").style.whiteSpace = "pre-wrap";
           document.getElementById("description").style.display = "flex";
         } else {
