@@ -115,6 +115,13 @@
         word-wrap: break-word;       /* Internet Explorer 5.5+ */
         max-width: 200mm;
       }
+      .tag-bubble {
+        background-color: #eee;
+        border-radius: 12px;
+        padding: 3px 10px;
+        font-size: 11px;
+        color: #333;
+      }
       @media print {
         body * {
           visibility: hidden;
@@ -142,6 +149,7 @@
         <img id="thumbnail" src="http://example.com" alt="Thumbnail" />
         <h2 id="title">Title</h2>
         <div id="author">Author</div>
+        <div id="tags" style="display:none; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:10px;"></div>
         <div id="description">Description</div>
         <div id="aboutUs"></div>
         <div id="qrcode"></div>
@@ -350,15 +358,62 @@
         window.history.replaceState({}, document.title, `?`);
       }
 
-      async function updateDescription(description) {
+      async function updateDescription(descriptionRaw) {
+        const {body: description, tags: tagLists} = splitDescriptionAndTags(descriptionRaw);
+
+        renderTags(tagLists);
+
         if (description && description.length > 0) {
-          document.getElementById("description").textContent = description.trim();
+          document.getElementById("description").textContent = description;
           document.getElementById("description").style.whiteSpace = "pre-wrap";
           document.getElementById("description").style.display = "flex";
         } else {
           document.getElementById("description").textContent = "";
           document.getElementById("description").style.display = "none";
         }
+      }
+
+      function renderTags(tagsRaw) {
+        if (!tagsRaw)
+          return;
+        const container = document.getElementById("tags");
+        const tags = tagsRaw.split(",").map(t => t.trim()).filter(Boolean);
+        if (tags.length === 0) {
+          container.style.display = "none";
+          container.innerHTML = "";
+          return;
+        }
+        container.innerHTML = tags.map(t => {
+          // Normalize tag before hashing so e.g. "#History" and "history" yield the same color
+          const normalized = t.toLowerCase().replace(/^#/, "");
+
+          // Hash the tag string into a 0-359 hue value (djb2-style)
+          let hash = 0;
+          for (let i = 0; i < normalized.length; i++) {
+            hash = normalized.charCodeAt(i) + ((hash << 5) - hash);
+          }
+          const hue = Math.abs(hash) % 360;
+
+          // Light pastel background (high lightness) keeps the bubble colorful but
+          // pale enough that dark text always stays legible regardless of hue.
+          const style = `background:hsl(${hue},70%,88%); color:hsl(${hue},50%,25%);`;
+
+          const label = t.startsWith("#") ? t : "#" + t;
+          return `<span class="tag-bubble" style="${style}">${label}</span>`;
+        }).join("");
+        container.style.display = "flex";
+      }
+
+      function splitDescriptionAndTags(text) {
+        // Match a trailing block of whitespace-separated #hashtags at end of string
+        const trailingTagBlock = /([\s\n]+)(#\w+(\s+#\w+)*)[\s\n]*$/;
+        const match = text.trim().match(trailingTagBlock);
+        if (!match) {
+          return { body: text.trim(), tags: "" };
+        }
+        const body = text.slice(0, match.index).trim();
+        const tags = match[2].match(/#\w+/g).map(t => t.toLowerCase()).join(", ");
+        return { body, tags };
       }
 
       async function updateURI(youtubeUrl, description) {
@@ -372,7 +427,7 @@
         let uri_args = [];
         uri_args.push(`v=${videoId}`);
         if (description && description.length > 0) {
-          uri_args.push(`d=${encodeURI(description)}`);
+          uri_args.push(`d=${encodeURIComponent(description)}`);
         }
         window.history.replaceState(
           {},
