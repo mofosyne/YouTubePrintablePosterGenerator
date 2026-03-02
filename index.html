@@ -392,7 +392,7 @@
 
         if (tagLists && tagListsExtracted)
         {
-          tagLists = tagLists.concat(tagListsExtracted);
+          tagLists = tagListsExtracted.concat(tagLists);
         }
 
         renderTags(tagLists);
@@ -439,14 +439,20 @@
       }
 
       function splitDescriptionAndTags(text) {
-        // Match a trailing block of whitespace-separated #hashtags at end of string
-        const trailingTagBlock = /([\s\n]+)(#\w+(\s+#\w+)*)[\s\n]*$/;
-        const match = text.trim().match(trailingTagBlock);
+
+        // Match trailing block of whitespace-separated #hashtags at end of string
+        const trailingTagBlock = /(?:^|[\s\n]+)(#\w+(?:\s+#\w+)*)[\s\n]*$/;
+
+        const trimmed = text.trim();
+        const match = trimmed.match(trailingTagBlock);
+
         if (!match) {
-          return { body: text.trim(), tags: "" };
+          return { body: trimmed, tags: "" };
         }
-        const body = text.slice(0, match.index).trim();
-        const tags = match[2].match(/#\w+/g);
+
+        const body = trimmed.slice(0, match.index).trim();
+        const tags = match[1].match(/#\w+/g);
+
         return { body, tags };
       }
 
