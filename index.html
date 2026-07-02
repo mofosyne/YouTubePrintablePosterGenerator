@@ -37,6 +37,8 @@
         margin: 20px;
         background-color: #fff;
         width: 140mm;
+        max-width: calc(100vw - 40px);
+        box-sizing: border-box;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       }
       #poster img {
@@ -107,6 +109,18 @@
       #compatibility-notice {
         font-size: 14px;
       }
+      #error-message {
+        display: none;
+        color: #b00020;
+        text-align: center;
+        font-size: 14px;
+        margin-top: 6px;
+        max-width: 300px;
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
       #debug_window pre {
         white-space: pre-wrap;       /* css-3 */
         white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
@@ -138,6 +152,7 @@
           left: 0;
           right: 0;
           margin: auto;
+          max-width: none;
         }
       }
     </style>
@@ -161,8 +176,13 @@
 
       <div id="control_panel">
         <div id="controls">
-          <input type="text" id="youtubeUrl" placeholder="Enter YouTube URL" />
-          <button type="button" onclick="generatePosterManually()">
+          <input
+            type="text"
+            id="youtubeUrl"
+            placeholder="Enter YouTube URL"
+            onkeydown="if (event.key === 'Enter') { event.preventDefault(); generatePosterManually(); }"
+          />
+          <button type="button" id="generate-button" onclick="generatePosterManually()">
             Generate
           </button>
           <button type="button" onclick="clearingPosterManually()">
@@ -177,6 +197,7 @@
             Print
           </button>
         </div>
+        <div id="error-message"></div>
         <div id="extracontent">
           <textarea
             type="text"
@@ -397,7 +418,7 @@
         qrCodeContainer.innerHTML = "";
 
         // https://stackoverflow.com/questions/2324944/in-javascript-how-do-i-determine-if-my-current-browser-is-firefox-on-a-computer
-        use_svg = true;
+        let use_svg = true;
         if (navigator.userAgent.search("Firefox") > -1) {
           // Disabling SVG in firefox as it doesn't print properly for some reason...
           // currently it look okay in html, but when in print preview it's all black...
@@ -415,10 +436,22 @@
         });
       }
 
+      // Cache of the last successfully fetched video, so editing the description
+      // doesn't have to re-hit the YouTube oEmbed API on every keystroke.
+      let lastLoadedUrl = null;
+      let lastVideoDetails = null;
+      let lastChannelTagList = [];
+
+      function showError(message) {
+        const errorElement = document.getElementById("error-message");
+        errorElement.textContent = message;
+        errorElement.style.display = message ? "block" : "none";
+      }
+
       async function generatePosterManually() {
         const youtubeUrl = document.getElementById("youtubeUrl").value;
         const descInput = document.getElementById("descInput").value;
-        generatePoster(youtubeUrl, descInput);
+        await generatePoster(youtubeUrl, descInput);
         updateURI(youtubeUrl, descInput);
       }
 
@@ -426,6 +459,11 @@
         document.getElementById("youtubeUrl").value = "";
         document.getElementById("descInput").value = "";
         document.getElementById("poster").style.display = "none";
+        document.getElementById("print-button").disabled = true;
+        lastLoadedUrl = null;
+        lastVideoDetails = null;
+        lastChannelTagList = [];
+        showError("");
         window.history.replaceState({}, document.title, `?`);
       }
 
@@ -519,21 +557,34 @@
       }
 
       async function descriptionUpdated() {
-        // No need to regenerate QR Code
-        const videoId = new URLSearchParams(window.location.search).get("v");
         const descInput = document.getElementById("descInput").value;
-        //updateTagsAndDescription(descInput, []);
-        if (videoId) {
-          const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
-          updateURI(youtubeUrl, descInput);
+        const youtubeUrl = document.getElementById("youtubeUrl").value;
+
+        if (!youtubeUrl) {
+          // No video loaded yet, nothing to update.
+          return;
         }
 
-        // Url should have been adjusted so read youtube url around here
-        const youtubeUrl = document.getElementById("youtubeUrl").value;
-        generatePoster(youtubeUrl, descInput)
+        const videoId = new URLSearchParams(window.location.search).get("v");
+        if (videoId) {
+          updateURI(`https://www.youtube.com/watch?v=${videoId}`, descInput);
+        }
+
+        if (lastLoadedUrl === youtubeUrl && lastVideoDetails) {
+          // Video details already fetched: just re-render tags/description
+          // locally instead of hitting the YouTube oEmbed API again.
+          updateTagsAndDescription(descInput, lastChannelTagList);
+        } else {
+          await generatePoster(youtubeUrl, descInput);
+        }
       }
 
       async function generatePoster(youtubeUrl, description) {
+        const generateButton = document.getElementById("generate-button");
+        generateButton.disabled = true;
+        const originalButtonText = generateButton.textContent;
+        generateButton.textContent = "Generating...";
+        showError("");
         try {
           var tagList = []
           const videoDetails = await fetchVideoDetails(youtubeUrl);
@@ -575,7 +626,7 @@
           document.getElementById("poster").style.display = "flex";
           document.getElementById("print-button").disabled = false;
 
-          debug_element = document.getElementById("debug_details");
+          const debug_element = document.getElementById("debug_details");
           debug_element.innerHTML = "<summary>oEmbed json</summary>";
           debug_element.appendChild(document.createElement("pre")).appendChild(document.createTextNode(JSON.stringify(videoDetails, null, 2)));
 
@@ -589,8 +640,15 @@
 
           updateTagsAndDescription(description, tagList);
           generateQRCode(youtubeUrl, videoDetails.thumbnail_height / 2);
+
+          lastLoadedUrl = youtubeUrl;
+          lastVideoDetails = videoDetails;
+          lastChannelTagList = tagList;
         } catch (error) {
-          alert("Error generating poster: " + error.message);
+          showError("Error generating poster: " + error.message);
+        } finally {
+          generateButton.disabled = false;
+          generateButton.textContent = originalButtonText;
         }
       }
 
